@@ -1,0 +1,22 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: battle-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/chronos_battle?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Fortaleza
+    username: chronos_battle_app
+    password: ${CHRONOS_DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/

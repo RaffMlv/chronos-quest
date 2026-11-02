@@ -29,3 +29,9 @@ chronos:
 logging:
   level:
     org.springframework.security: TRACE
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

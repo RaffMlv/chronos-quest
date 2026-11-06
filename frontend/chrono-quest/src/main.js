@@ -2,6 +2,9 @@ import Phaser from 'phaser';
 import MenuScene from './scenes/MenuScene.js';
 import LoginScene from './scenes/LoginScene.js';
 import RegisterScene from './scenes/RegisterScene.js';
+import CharacterSelectScene from './scenes/CharacterSelectScene.js';
+import TemporalMapScene from './scenes/TemporalMapScene.js';
+import ExplorationScene from './scenes/ExplorationScene.js';
 import './styles/style.css';
 
 const config = {
@@ -18,7 +21,7 @@ const config = {
         autoCenter: Phaser.Scale.CENTER_BOTH
     },
 
-    scene: [MenuScene, LoginScene, RegisterScene]
+    scene: [MenuScene, LoginScene, RegisterScene, CharacterSelectScene, TemporalMapScene, ExplorationScene]
 };
 
 const game = new Phaser.Game(config);

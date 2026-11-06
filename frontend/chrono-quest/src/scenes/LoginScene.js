@@ -99,10 +99,11 @@ export default class LoginScene extends Phaser.Scene {
             const email = elemento.getChildByID('email').value;
             const senha = elemento.getChildByID('senha').value;
 
-            console.log('E-mail:', email);
-            console.log('Senha preenchida:', senha.length > 0);
+            console.log('E-mail informado:', email);
 
-            this.mensagem.setText('Interface funcionando! Login ainda não conectado.');
+            if (email && senha) {
+                this.scene.start('CharacterSelectScene');
+            }
         });
 
         elemento.addListener('click');
@@ -112,17 +113,6 @@ export default class LoginScene extends Phaser.Scene {
                 this.scene.start('RegisterScene');
             }
         });
-
-        this.mensagem = this.add.text(
-            largura / 2,
-            altura * 0.78,
-            '',
-            {
-                fontSize: '14px',
-                color: '#d8b76a',
-                align: 'center'
-            }
-        ).setOrigin(0.5);
 
         this.add.text(
             largura / 2,

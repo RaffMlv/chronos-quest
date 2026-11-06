@@ -14,6 +14,8 @@ import com.chronosquest.characterservice.repository.CharacterRepository;
 import com.chronosquest.characterservice.exception.ConflictException;
 import com.chronosquest.characterservice.exception.ResourceNotFoundException;
 
+import com.chronosquest.characterservice.factory.CharacterFactoryProvider;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,12 +28,16 @@ public class CharacterService {
     private final CharacterRepository characterRepository;
     private final CharacterClassRepository characterClassRepository;
 
+    private final CharacterFactoryProvider characterFactoryProvider;
+
     public CharacterService(
             CharacterRepository characterRepository,
-            CharacterClassRepository characterClassRepository
+            CharacterClassRepository characterClassRepository,
+            CharacterFactoryProvider characterFactoryProvider
     ) {
         this.characterRepository = characterRepository;
         this.characterClassRepository = characterClassRepository;
+        this.characterFactoryProvider = characterFactoryProvider;
     }
 
     @Transactional
@@ -54,11 +60,13 @@ public class CharacterService {
                         "Classe de personagem não encontrada."
                 ));
 
-        CharacterEntity character = new CharacterEntity();
-
-        character.setName(request.getName());
-        character.setUserId(userId);
-        character.setCharacterClass(characterClass);
+        CharacterEntity character = characterFactoryProvider
+                .getFactory(characterClass.getName())
+                .createCharacter(
+                        request.getName(),
+                        userId,
+                        characterClass
+                );
 
         CharacterSheet sheet = new CharacterSheet();
 

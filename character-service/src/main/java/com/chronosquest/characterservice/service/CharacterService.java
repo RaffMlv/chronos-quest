@@ -18,6 +18,12 @@ import com.chronosquest.characterservice.factory.CharacterFactoryProvider;
 
 import com.chronosquest.characterservice.builder.SpecialCharacterSheetBuilder;
 
+import com.chronosquest.characterservice.abstractfactory.CharacterResourceFactory;
+import com.chronosquest.characterservice.abstractfactory.CharacterResourceFactoryProvider;
+import com.chronosquest.characterservice.abstractfactory.CharacterSkillProduct;
+import com.chronosquest.characterservice.abstractfactory.CharacterEquipmentProduct;
+import com.chronosquest.characterservice.model.CharacterSkill;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,14 +38,19 @@ public class CharacterService {
 
     private final CharacterFactoryProvider characterFactoryProvider;
 
+    private final CharacterResourceFactoryProvider
+            characterResourceFactoryProvider;
+
     public CharacterService(
             CharacterRepository characterRepository,
             CharacterClassRepository characterClassRepository,
-            CharacterFactoryProvider characterFactoryProvider
+            CharacterFactoryProvider characterFactoryProvider,
+            CharacterResourceFactoryProvider characterResourceFactoryProvider
     ) {
         this.characterRepository = characterRepository;
         this.characterClassRepository = characterClassRepository;
         this.characterFactoryProvider = characterFactoryProvider;
+        this.characterResourceFactoryProvider = characterResourceFactoryProvider;
     }
 
     @Transactional

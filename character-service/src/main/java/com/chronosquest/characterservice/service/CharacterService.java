@@ -16,6 +16,8 @@ import com.chronosquest.characterservice.exception.ResourceNotFoundException;
 
 import com.chronosquest.characterservice.factory.CharacterFactoryProvider;
 
+import com.chronosquest.characterservice.builder.SpecialCharacterSheetBuilder;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,9 +70,15 @@ public class CharacterService {
                         characterClass
                 );
 
-        CharacterSheet sheet = new CharacterSheet();
+        SpecialCharacterSheetBuilder sheetBuilder =
+                new SpecialCharacterSheetBuilder();
 
-        sheet.setCharacter(character);
+        sheetBuilder.setCharacter(character);
+
+        CharacterSheet sheet = sheetBuilder
+                .buildSpecialSheet(characterClass)
+                .build();
+
         character.setSheet(sheet);
 
         CharacterEntity savedCharacter =

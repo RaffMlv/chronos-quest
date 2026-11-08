@@ -1,47 +1,122 @@
 package com.chronosquest.battle_service.model;
 
 import jakarta.persistence.*;
-import java.time.Instant;
 
 @Entity
-@Table(name = "battle_sessions")
+@Table(name = "tb_battle_session")
 public class BattleSession {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
     private Long userId;
-
-    @Column(name = "enemy_name", nullable = false)
+    private Long characterId;
     private String enemyName;
+    private String era;
 
-    @Column(name = "current_actor", nullable = false)
-    private String currentActor;
+    private int playerHp;
+    private int playerMaxHp;
+    private int enemyHp;
+    private int enemyMaxHp;
 
-    @Column(nullable = false)
-    private boolean active = true;
+    private String currentTurn;
+    private String status;
+    private int lastDamageDealt;
 
-    @Column(name = "created_at", nullable = false)
-    private Instant createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = Instant.now();
-        currentActor = "PLAYER";
+    public Long getId() {
+        return id;
     }
 
-    public void setState(Object state) {
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public Long getId() { return id; }
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
-    public String getEnemyName() { return enemyName; }
-    public void setEnemyName(String enemyName) { this.enemyName = enemyName; }
-    public String getCurrentActor() { return currentActor; }
-    public void setCurrentActor(String currentActor) { this.currentActor = currentActor; }
-    public boolean isActive() { return active; }
-    public void setActive(boolean active) { this.active = active; }
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Long getCharacterId() {
+        return characterId;
+    }
+
+    public void setCharacterId(Long characterId) {
+        this.characterId = characterId;
+    }
+
+    public String getEnemyName() {
+        return enemyName;
+    }
+
+    public void setEnemyName(String enemyName) {
+        this.enemyName = enemyName;
+    }
+
+    public String getEra() {
+        return era;
+    }
+
+    public void setEra(String era) {
+        this.era = era;
+    }
+
+    public int getPlayerHp() {
+        return playerHp;
+    }
+
+    public void setPlayerHp(int playerHp) {
+        this.playerHp = playerHp;
+    }
+
+    public int getPlayerMaxHp() {
+        return playerMaxHp;
+    }
+
+    public void setPlayerMaxHp(int playerMaxHp) {
+        this.playerMaxHp = playerMaxHp;
+    }
+
+    public int getEnemyHp() {
+        return enemyHp;
+    }
+
+    public void setEnemyHp(int enemyHp) {
+        this.enemyHp = enemyHp;
+    }
+
+    public int getEnemyMaxHp() {
+        return enemyMaxHp;
+    }
+
+    public void setEnemyMaxHp(int enemyMaxHp) {
+        this.enemyMaxHp = enemyMaxHp;
+    }
+
+    public String getCurrentTurn() {
+        return currentTurn;
+    }
+
+    public void setCurrentTurn(String currentTurn) {
+        this.currentTurn = currentTurn;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public int getLastDamageDealt() {
+        return lastDamageDealt;
+    }
+
+    public void setLastDamageDealt(int lastDamageDealt) {
+        this.lastDamageDealt = lastDamageDealt;
+    }
 }

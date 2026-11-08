@@ -16,12 +16,15 @@ spring:
       ddl-auto: update
     show-sql: true
 
+<<<<<<< HEAD
   security:
     oauth2:
       resourceserver:
         jwt:
           public-key-location: file:C:/Users/anaca/projetos/chronos-secrets/user-service/public.pem
 
+=======
+>>>>>>> origin/main
 eureka:
   client:
     serviceUrl:

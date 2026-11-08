@@ -1,0 +1,37 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: user-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/chronos_user?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Fortaleza
+    username: chronos_user_app
+    password: ${CHRONOS_DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+chronos:
+  jwt:
+    private-key-path: C:/Users/Acer/projetos/chronos-secrets/user-service/private.pem
+    public-key-path: C:/Users/Acer/projetos/chronos-secrets/user-service/public.pem
+
+logging:
+  level:
+    org.springframework.security: TRACE
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

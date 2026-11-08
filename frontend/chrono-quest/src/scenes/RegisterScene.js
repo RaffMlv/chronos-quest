@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { registerUser, login } from '../services/api.js';
+import { INPUT_STYLE, PRIMARY_BTN_STYLE, GHOST_BTN_STYLE } from '../game/ui.js';
 
 export default class RegisterScene extends Phaser.Scene {
     constructor() {
@@ -11,105 +13,82 @@ export default class RegisterScene extends Phaser.Scene {
 
         this.cameras.main.setBackgroundColor('#080d1a');
 
-        this.add.text(largura / 2, altura * 0.18, 'CHRONOS QUEST', {
-            fontSize: '38px',
+        this.add.text(largura / 2, altura * 0.09, 'CHRONOS QUEST', {
+            fontSize: '34px',
             fontStyle: 'bold',
             color: '#d8b76a'
         }).setOrigin(0.5);
 
-        this.add.text(largura / 2, altura * 0.29, 'CRIAR CONTA', {
-            fontSize: '22px',
+        this.add.text(largura / 2, altura * 0.16, 'CRIAR CONTA', {
+            fontSize: '20px',
             color: '#ffffff'
         }).setOrigin(0.5);
 
+        // Campos conforme RegisterUserRequest do user-service:
+        // username (3-50), email, password (8-72), displayName (até 80).
         const formulario = `
-            <form id="register-form" style="
-                width: 300px;
-                display: flex;
-                flex-direction: column;
-                gap: 12px;
-                font-family: Arial;
-            ">
-                <input id="nome" type="text"
-                    placeholder="Nome do jogador" required
-                    style="padding:14px; background:#17243a;
-                    color:white; border:1px solid #d8b76a;
-                    border-radius:6px; font-size:16px;">
-
-                <input id="email" type="email"
-                    placeholder="Seu e-mail" required
-                    style="padding:14px; background:#17243a;
-                    color:white; border:1px solid #d8b76a;
-                    border-radius:6px; font-size:16px;">
-
-                <input id="senha" type="password"
-                    placeholder="Crie uma senha" required
-                    style="padding:14px; background:#17243a;
-                    color:white; border:1px solid #d8b76a;
-                    border-radius:6px; font-size:16px;">
-
-                <input id="confirmar" type="password"
-                    placeholder="Confirme sua senha" required
-                    style="padding:14px; background:#17243a;
-                    color:white; border:1px solid #d8b76a;
-                    border-radius:6px; font-size:16px;">
-
-                <button type="submit" style="
-                    padding:14px; background:#d8b76a;
-                    color:#080d1a; border:none;
-                    border-radius:6px; font-weight:bold;
-                    cursor:pointer;">
-                    CADASTRAR
-                </button>
-
-                <button id="voltar-login" type="button" style="
-                    padding:12px; background:transparent;
-                    color:white; border:1px solid #d8b76a;
-                    border-radius:6px; cursor:pointer;">
-                    JÁ TENHO CONTA
-                </button>
+            <form id="register-form" style="width:300px;display:flex;flex-direction:column;gap:10px;font-family:Arial;">
+                <input id="username" type="text" autocomplete="username" minlength="3" maxlength="50"
+                    placeholder="Usuário (3 a 50 caracteres)" required style="${INPUT_STYLE}">
+                <input id="displayName" type="text" maxlength="80"
+                    placeholder="Nome de exibição" required style="${INPUT_STYLE}">
+                <input id="email" type="email" autocomplete="email" maxlength="254"
+                    placeholder="Seu e-mail" required style="${INPUT_STYLE}">
+                <input id="senha" type="password" autocomplete="new-password" minlength="8" maxlength="72"
+                    placeholder="Senha (mínimo 8 caracteres)" required style="${INPUT_STYLE}">
+                <input id="confirmar" type="password" autocomplete="new-password"
+                    placeholder="Confirme sua senha" required style="${INPUT_STYLE}">
+                <button id="cadastrar" type="submit" style="${PRIMARY_BTN_STYLE}">CADASTRAR</button>
+                <button id="voltar-login" type="button" style="${GHOST_BTN_STYLE}">JÁ TENHO CONTA</button>
             </form>
         `;
 
-        const elemento = this.add.dom(
-            largura / 2,
-            altura * 0.55
-        ).createFromHTML(formulario);
+        const elemento = this.add.dom(largura / 2, altura * 0.54).createFromHTML(formulario);
+
+        this.mensagem = this.add.text(largura / 2, altura * 0.95, '', {
+            fontSize: '14px',
+            color: '#ff8080',
+            align: 'center',
+            wordWrap: { width: Math.min(320, largura - 32) }
+        }).setOrigin(0.5);
 
         elemento.addListener('submit');
-
-        elemento.on('submit', (event) => {
+        elemento.on('submit', async (event) => {
             event.preventDefault();
 
-            const senha = elemento.getChildByID('senha').value;
-            const confirmar = elemento.getChildByID('confirmar').value;
+            const valor = (id) => elemento.getChildByID(id).value;
+            const username = valor('username').trim();
+            const displayName = valor('displayName').trim();
+            const email = valor('email').trim();
+            const senha = valor('senha');
+            const confirmar = valor('confirmar');
+            const botao = elemento.getChildByID('cadastrar');
 
             if (senha !== confirmar) {
-                this.mensagem.setText('As senhas não coincidem!');
+                this.mensagem.setColor('#ff8080').setText('As senhas não coincidem.');
                 return;
             }
 
-            this.mensagem.setText(
-                'Cadastro pronto para integração com o servidor.'
-            );
+            botao.disabled = true;
+            this.mensagem.setColor('#d8b76a').setText('Criando conta...');
+
+            try {
+                await registerUser({ username, email, password: senha, displayName });
+                this.mensagem.setText('Conta criada! Entrando...');
+                await login(username, senha);
+                this.scene.start('CharacterSelectScene');
+            } catch (erro) {
+                if (!this.sys.isActive()) return;
+                this.mensagem.setColor('#ff8080').setText(erro.message);
+                botao.disabled = false;
+            }
         });
 
         elemento.addListener('click');
-
         elemento.on('click', (event) => {
             if (event.target.id === 'voltar-login') {
                 this.scene.start('LoginScene');
             }
         });
-
-        this.mensagem = this.add.text(
-            largura / 2,
-            altura * 0.85,
-            '',
-            {
-                fontSize: '14px',
-                color: '#d8b76a'
-            }
-        ).setOrigin(0.5);
     }
 }

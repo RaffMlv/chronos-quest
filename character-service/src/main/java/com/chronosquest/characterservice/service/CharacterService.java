@@ -24,6 +24,9 @@ import com.chronosquest.characterservice.abstractfactory.CharacterSkillProduct;
 import com.chronosquest.characterservice.abstractfactory.CharacterEquipmentProduct;
 import com.chronosquest.characterservice.model.CharacterSkill;
 
+import com.chronosquest.characterservice.dto.CharacterSkillResponse;
+import java.util.ArrayList;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -92,6 +95,24 @@ public class CharacterService {
 
         character.setSheet(sheet);
 
+        CharacterResourceFactory resourceFactory =
+                characterResourceFactoryProvider.
+                        getFactory(characterClass.getName()
+                );
+        CharacterSkillProduct skillProduct = resourceFactory.createSkill();
+
+        CharacterEquipmentProduct equipmentProduct = resourceFactory.createEquipment();
+
+        CharacterSkill skill = new CharacterSkill();
+
+        skill.setName(skillProduct.getName());
+        skill.setDescription(skillProduct.getDescription());
+        skill.setPower(skillProduct.getPower());
+        skill.setDamageType(skillProduct.getDamageType());
+
+        character.addSkill(skill);
+
+
         CharacterEntity savedCharacter =
                 characterRepository.save(character);
 
@@ -133,6 +154,23 @@ public class CharacterService {
         response.setClassId(character.getCharacterClass().getId());
         response.setClassName(character.getCharacterClass().getName());
         response.setCreatedAt(character.getCreatedAt());
+
+        List<CharacterSkillResponse> skillResponses =
+                new ArrayList<>();
+
+        for (CharacterSkill characterSkill : character.getSkills()){
+            CharacterSkillResponse skillResponse =
+                    new CharacterSkillResponse();
+
+            skillResponse.setName(characterSkill.getName());
+            skillResponse.setDescription(characterSkill.getDescription());
+            skillResponse.setPower(characterSkill.getPower());
+            skillResponse.setDamageType(characterSkill.getDamageType());
+
+            skillResponses.add(skillResponse);
+        }
+
+        response.setSkills(skillResponses);
 
         CharacterSheet sheet = character.getSheet();
 

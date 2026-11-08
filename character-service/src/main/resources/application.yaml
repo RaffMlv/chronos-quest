@@ -34,4 +34,4 @@ management:
 
 security:
   jwt:
-    public-key: file:C:/Users/Acer/projetos/chronos-secrets/user-service/public.pem
+    public-key: ${JWT_PUBLIC_KEY_LOCATION}

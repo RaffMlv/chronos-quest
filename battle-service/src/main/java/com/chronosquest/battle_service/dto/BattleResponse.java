@@ -1,0 +1,69 @@
+package com.chronosquest.battle_service.dto;
+
+import com.chronosquest.battle_service.model.BattleSession;
+
+public class BattleResponse {
+    private Long battleId;
+    private Long characterId;
+    private String enemyName;
+    private int playerHp;
+    private int playerMaxHp;
+    private int enemyHp;
+    private int enemyMaxHp;
+    private String currentTurn;
+    private String status;
+    private int lastDamageDealt;
+
+    public BattleResponse(BattleSession session) {
+        this.battleId = session.getId();
+        this.characterId = session.getCharacterId();
+        this.enemyName = session.getEnemyName();
+        this.playerHp = session.getPlayerHp();
+        this.playerMaxHp = session.getPlayerMaxHp();
+        this.enemyHp = session.getEnemyHp();
+        this.enemyMaxHp = session.getEnemyMaxHp();
+        this.currentTurn = session.getCurrentTurn();
+        this.status = session.getStatus();
+        this.lastDamageDealt = session.getLastDamageDealt();
+    }
+
+    public Long getBattleId() {
+        return battleId;
+    }
+
+    public Long getCharacterId() {
+        return characterId;
+    }
+
+    public String getEnemyName() {
+        return enemyName;
+    }
+
+    public int getPlayerHp() {
+        return playerHp;
+    }
+
+    public int getPlayerMaxHp() {
+        return playerMaxHp;
+    }
+
+    public int getEnemyHp() {
+        return enemyHp;
+    }
+
+    public int getEnemyMaxHp() {
+        return enemyMaxHp;
+    }
+
+    public String getCurrentTurn() {
+        return currentTurn;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public int getLastDamageDealt() {
+        return lastDamageDealt;
+    }
+}

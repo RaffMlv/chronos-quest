@@ -1,0 +1,8 @@
+package com.chronosquest.battle_service.dto;
+
+public class BattleActionRequest {
+    private String action;
+
+    public String getAction() { return action; }
+    public void setAction(String action) { this.action = action; }
+}

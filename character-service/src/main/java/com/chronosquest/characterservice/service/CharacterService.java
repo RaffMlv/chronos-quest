@@ -14,6 +14,19 @@ import com.chronosquest.characterservice.repository.CharacterRepository;
 import com.chronosquest.characterservice.exception.ConflictException;
 import com.chronosquest.characterservice.exception.ResourceNotFoundException;
 
+import com.chronosquest.characterservice.factory.CharacterFactoryProvider;
+
+import com.chronosquest.characterservice.builder.SpecialCharacterSheetBuilder;
+
+import com.chronosquest.characterservice.abstractfactory.CharacterResourceFactory;
+import com.chronosquest.characterservice.abstractfactory.CharacterResourceFactoryProvider;
+import com.chronosquest.characterservice.abstractfactory.CharacterSkillProduct;
+import com.chronosquest.characterservice.abstractfactory.CharacterEquipmentProduct;
+import com.chronosquest.characterservice.model.CharacterSkill;
+
+import com.chronosquest.characterservice.dto.CharacterSkillResponse;
+import java.util.ArrayList;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,12 +39,21 @@ public class CharacterService {
     private final CharacterRepository characterRepository;
     private final CharacterClassRepository characterClassRepository;
 
+    private final CharacterFactoryProvider characterFactoryProvider;
+
+    private final CharacterResourceFactoryProvider
+            characterResourceFactoryProvider;
+
     public CharacterService(
             CharacterRepository characterRepository,
-            CharacterClassRepository characterClassRepository
+            CharacterClassRepository characterClassRepository,
+            CharacterFactoryProvider characterFactoryProvider,
+            CharacterResourceFactoryProvider characterResourceFactoryProvider
     ) {
         this.characterRepository = characterRepository;
         this.characterClassRepository = characterClassRepository;
+        this.characterFactoryProvider = characterFactoryProvider;
+        this.characterResourceFactoryProvider = characterResourceFactoryProvider;
     }
 
     @Transactional
@@ -54,16 +76,42 @@ public class CharacterService {
                         "Classe de personagem não encontrada."
                 ));
 
-        CharacterEntity character = new CharacterEntity();
+        CharacterEntity character = characterFactoryProvider
+                .getFactory(characterClass.getName())
+                .createCharacter(
+                        request.getName(),
+                        userId,
+                        characterClass
+                );
 
-        character.setName(request.getName());
-        character.setUserId(userId);
-        character.setCharacterClass(characterClass);
+        SpecialCharacterSheetBuilder sheetBuilder =
+                new SpecialCharacterSheetBuilder();
 
-        CharacterSheet sheet = new CharacterSheet();
+        sheetBuilder.setCharacter(character);
 
-        sheet.setCharacter(character);
+        CharacterSheet sheet = sheetBuilder
+                .buildSpecialSheet(characterClass)
+                .build();
+
         character.setSheet(sheet);
+
+        CharacterResourceFactory resourceFactory =
+                characterResourceFactoryProvider.
+                        getFactory(characterClass.getName()
+                );
+        CharacterSkillProduct skillProduct = resourceFactory.createSkill();
+
+        CharacterEquipmentProduct equipmentProduct = resourceFactory.createEquipment();
+
+        CharacterSkill skill = new CharacterSkill();
+
+        skill.setName(skillProduct.getName());
+        skill.setDescription(skillProduct.getDescription());
+        skill.setPower(skillProduct.getPower());
+        skill.setDamageType(skillProduct.getDamageType());
+
+        character.addSkill(skill);
+
 
         CharacterEntity savedCharacter =
                 characterRepository.save(character);
@@ -106,6 +154,23 @@ public class CharacterService {
         response.setClassId(character.getCharacterClass().getId());
         response.setClassName(character.getCharacterClass().getName());
         response.setCreatedAt(character.getCreatedAt());
+
+        List<CharacterSkillResponse> skillResponses =
+                new ArrayList<>();
+
+        for (CharacterSkill characterSkill : character.getSkills()){
+            CharacterSkillResponse skillResponse =
+                    new CharacterSkillResponse();
+
+            skillResponse.setName(characterSkill.getName());
+            skillResponse.setDescription(characterSkill.getDescription());
+            skillResponse.setPower(characterSkill.getPower());
+            skillResponse.setDamageType(characterSkill.getDamageType());
+
+            skillResponses.add(skillResponse);
+        }
+
+        response.setSkills(skillResponses);
 
         CharacterSheet sheet = character.getSheet();
 

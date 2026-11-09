@@ -2,6 +2,8 @@ package com.chronosquest.characterservice.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(
@@ -45,6 +47,13 @@ public class CharacterEntity {
             fetch = FetchType.LAZY
     )
     private CharacterSheet sheet;
+
+    @OneToMany(
+            mappedBy = "character",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<CharacterSkill> skills = new ArrayList<>();
 
     public CharacterEntity() {
     }
@@ -91,5 +100,18 @@ public class CharacterEntity {
 
     public void setSheet(CharacterSheet sheet) {
         this.sheet = sheet;
+    }
+
+    public List<CharacterSkill> getSkills() {
+        return skills;
+    }
+
+    public void setSkills(List<CharacterSkill> skills) {
+        this.skills = skills;
+    }
+
+    public void addSkill(CharacterSkill skill) {
+        skills.add(skill);
+        skill.setCharacter(this);
     }
 }

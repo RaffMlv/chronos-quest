@@ -99,4 +99,52 @@ public class CharacterSheet {
     public Integer getMaxManaPoints() {
         return maxManaPoints;
     }
+
+    public void setLevel(Integer level) {
+        this.level = level;
+    }
+
+    public void setExperience(Long experience) {
+        this.experience = experience;
+    }
+
+    public void setStrength(Integer strength) {
+        this.strength = strength;
+    }
+
+    public void setDexterity(Integer dexterity) {
+        this.dexterity = dexterity;
+    }
+
+    public void setConstitution(Integer constitution) {
+        this.constitution = constitution;
+    }
+
+    public void setIntelligence(Integer intelligence) {
+        this.intelligence = intelligence;
+    }
+
+    public void setWisdom(Integer wisdom) {
+        this.wisdom = wisdom;
+    }
+
+    public void setCharisma(Integer charisma) {
+        this.charisma = charisma;
+    }
+
+    public void setHealthPoints(Integer healthPoints) {
+        this.healthPoints = healthPoints;
+    }
+
+    public void setMaxHealthPoints(Integer maxHealthPoints) {
+        this.maxHealthPoints = maxHealthPoints;
+    }
+
+    public void setManaPoints(Integer manaPoints) {
+        this.manaPoints = manaPoints;
+    }
+
+    public void setMaxManaPoints(Integer maxManaPoints) {
+        this.maxManaPoints = maxManaPoints;
+    }
 }

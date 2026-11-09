@@ -1,5 +1,6 @@
 package com.chronosquest.userservice.service;
 
+import com.chronosquest.userservice.builder.UserBuilder;
 import com.chronosquest.userservice.dto.RegisterUserRequest;
 import com.chronosquest.userservice.dto.UserResponse;
 import com.chronosquest.userservice.exception.UserAlreadyExistsException;
@@ -50,15 +51,14 @@ public class UserService {
             );
         }
 
-        User user = new User();
-
-        user.setUsername(username);
-        user.setEmail(email);
-        user.setDisplayName(displayName);
-
-        user.setPasswordHash(
-                passwordEncoder.encode(request.password())
-        );
+        User user = new UserBuilder()
+                .username(username)
+                .email(email)
+                .displayName(displayName)
+                .passwordHash(
+                        passwordEncoder.encode(request.password())
+                )
+                .build();
 
         User savedUser = userRepository.save(user);
 

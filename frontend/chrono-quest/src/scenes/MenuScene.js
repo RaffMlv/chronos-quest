@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { enableOfflineMode } from '../services/api.js';
 
 export default class MenuScene extends Phaser.Scene {
     constructor() {
@@ -36,6 +37,19 @@ export default class MenuScene extends Phaser.Scene {
             'CONFIGURAÇÕES',
             () => console.log('Configurações')
         );
+
+        // Só aparece com `npm run dev`; não vai para o build de produção.
+        if (import.meta.env.DEV) {
+            this.criarBotao(
+                largura / 2,
+                altura * 0.75,
+                'MODO TESTE (SEM LOGIN)',
+                () => {
+                    enableOfflineMode();
+                    this.scene.start('CharacterSelectScene');
+                }
+            );
+        }
     }
 
     criarBotao(x, y, texto, acao) {

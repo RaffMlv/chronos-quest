@@ -7,6 +7,9 @@ import CharacterSelectScene from './scenes/CharacterSelectScene.js';
 import TemporalMapScene from './scenes/TemporalMapScene.js';
 import ExplorationScene from './scenes/ExplorationScene.js';
 import BattleScene from './scenes/BattleScene.js';
+import ShopScene from './scenes/ShopScene.js';
+import InventoryScene from './scenes/InventoryScene.js';
+import NotificationsScene from './scenes/NotificationsScene.js';
 import './styles/style.css';
 
 const config = {
@@ -40,7 +43,10 @@ const config = {
         CharacterSelectScene,
         TemporalMapScene,
         ExplorationScene,
-        BattleScene
+        BattleScene,
+        ShopScene,
+        InventoryScene,
+        NotificationsScene
     ]
 };
 

@@ -27,4 +27,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             Long recipientId,
             NotificationStatus status
     );
+
+    List<Notification> findByStatus(NotificationStatus status);
 }

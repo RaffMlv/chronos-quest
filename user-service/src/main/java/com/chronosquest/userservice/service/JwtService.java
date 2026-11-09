@@ -30,6 +30,7 @@ public class JwtService {
                 .expiresAt(now.plusSeconds(EXPIRATION_SECONDS))
                 .subject(userId.toString())
                 .claim("username", username)
+                .claim("scope", "notification.write")
                 .build();
 
         JwsHeader header = JwsHeader

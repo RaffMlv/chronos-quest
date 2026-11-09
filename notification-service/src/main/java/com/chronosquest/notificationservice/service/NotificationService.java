@@ -10,6 +10,7 @@ import com.chronosquest.notificationservice.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,9 +18,12 @@ import java.util.stream.Collectors;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final NotificationSender notificationSender;
 
-    public NotificationService(NotificationRepository notificationRepository) {
+    public NotificationService(NotificationRepository notificationRepository,
+                               NotificationSender notificationSender) {
         this.notificationRepository = notificationRepository;
+        this.notificationSender = notificationSender;
     }
 
     // Criar notificação
@@ -106,6 +110,25 @@ public class NotificationService {
                 .orElseThrow(() -> new RuntimeException("Notificação não encontrada."));
 
         notificationRepository.delete(notification);
+    }
+
+    @Transactional
+    public int processPendingNotifications() {
+
+        List<Notification> pendingNotifications =
+                notificationRepository.findByStatus(NotificationStatus.PENDING);
+
+        for (Notification notification : pendingNotifications) {
+
+            notificationSender.send(notification);
+
+            notification.setStatus(NotificationStatus.SENT);
+            notification.setSentAt(LocalDateTime.now());
+        }
+
+        notificationRepository.saveAll(pendingNotifications);
+
+        return pendingNotifications.size();
     }
 
     // Converter entidade para DTO

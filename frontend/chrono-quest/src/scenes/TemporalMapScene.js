@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { ERAS } from '../game/eras.js';
 import { classByName } from '../game/classes.js';
 import { addButton } from '../game/ui.js';
+import { listNotifications } from '../services/api.js';
 
 export default class TemporalMapScene extends Phaser.Scene {
     constructor() {
@@ -37,6 +38,20 @@ export default class TemporalMapScene extends Phaser.Scene {
             color: '#ffffff',
             lineSpacing: 2
         }).setOrigin(0, 0.5);
+
+        // Atalhos: loja, inventário e notificações (canto superior direito)
+        const bx = largura - 86;
+        addButton(this, bx, 28, 150, 28, 'LOJA', () => this.scene.start('ShopScene'), { fontSize: '12px' });
+        addButton(this, bx, 62, 150, 28, 'INVENTÁRIO', () => this.scene.start('InventoryScene'), { fontSize: '12px' });
+        const btnNotif = addButton(this, bx, 96, 150, 28, 'NOTIFICAÇÕES', () => this.scene.start('NotificationsScene'), { fontSize: '12px' });
+
+        // Contador de não lidas (se o serviço de notificações não responder, fica sem número)
+        listNotifications()
+            .then((lista) => {
+                const naoLidas = lista.filter((n) => n.status !== 'READ').length;
+                if (this.sys.isActive() && naoLidas > 0) btnNotif.setLabel(`NOTIFICAÇÕES (${naoLidas})`);
+            })
+            .catch(() => {});
 
         // Em tela vertical (celular) os cards ficam empilhados.
         const vertical = largura < altura * 0.9;

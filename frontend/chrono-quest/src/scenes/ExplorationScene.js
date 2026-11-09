@@ -409,6 +409,13 @@ export default class ExplorationScene extends Phaser.Scene {
         const enemy = this.enemies.getChildren().find((e) => e.getData('id') === this.battleEnemyId);
 
         this.inBattle = false;
+
+        if (result.aborted) {
+            this.invulnUntil = this.time.now + 3000;
+            this.showToast('Não foi possível iniciar a batalha.');
+            return;
+        }
+
         this.invulnUntil = this.time.now + 1500;
 
         rt.hp = result.hp;

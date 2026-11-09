@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { classByName } from '../game/classes.js';
 import { createBattle, playerAction } from '../services/battleLocal.js';
+import { createRemoteBattle, remoteAction } from '../services/battleRemote.js';
+import { isOffline } from '../services/api.js';
 import { addButton } from '../game/ui.js';
 
 const tweenP = (scene, config) =>
@@ -11,9 +13,9 @@ const wait = (scene, ms) =>
 
 // Batalha por turnos, exibida por cima da ExplorationScene (que fica pausada).
 //
-// PROVISÓRIO: os cálculos vêm de services/battleLocal.js porque o Battle Service
-// ainda não tem endpoints. Esta cena só apresenta eventos e envia a ação escolhida,
-// então trocar a fonte dos dados por chamadas REST não deve exigir mexer no visual.
+// Com login, os cálculos vêm do Battle Service (services/battleRemote.js).
+// No MODO TESTE (sem login, só em desenvolvimento) usa services/battleLocal.js.
+// Em ambos os casos esta cena só apresenta eventos e envia a ação escolhida.
 export default class BattleScene extends Phaser.Scene {
     constructor() {
         super('BattleScene');
@@ -32,8 +34,9 @@ export default class BattleScene extends Phaser.Scene {
         this.H = h;
         this.era = era;
         this.cls = classByName(character.className);
-        this.battle = createBattle({ character, hp, mp }, era.enemy);
-        this.busy = false;
+        this.online = !isOffline();
+        this.battle = null;
+        this.busy = true;
         this.s = Phaser.Math.Clamp(Math.floor(Math.min(w / 4.5, h / 4) / 16), 3, 8);
 
         const s = this.s;
@@ -80,7 +83,11 @@ export default class BattleScene extends Phaser.Scene {
             wordWrap: { width: w - 40 }
         }).setOrigin(0.5, 0);
 
-        this.add.text(w / 2, 10, 'Batalha local provisória • o Battle Service ainda não tem endpoints', {
+        const aviso = this.online
+            ? 'Batalha processada pelo Battle Service'
+            : 'Modo teste: batalha local, sem backend';
+
+        this.add.text(w / 2, 10, aviso, {
             fontSize: '11px',
             color: '#c9d2e3',
             align: 'center',
@@ -95,11 +102,54 @@ export default class BattleScene extends Phaser.Scene {
         const skill = this.cls.skill;
 
         this.btnAttack = addButton(this, w / 2 - (bw + 8), by, bw, 56, 'ATACAR', () => this.act('attack'), { fontSize: '15px' });
-        this.btnSkill = addButton(this, w / 2, by, bw, 56, `${skill.name}\n${skill.cost} MP`, () => this.act('skill'), { fontSize: '12px' });
+        const rotuloSkill = this.online ? skill.name : `${skill.name}\n${skill.cost} MP`;
+
+        this.btnSkill = addButton(this, w / 2, by, bw, 56, rotuloSkill, () => this.act('skill'), { fontSize: '12px' });
         this.btnDefend = addButton(this, w / 2 + (bw + 8), by, bw, 56, 'DEFENDER', () => this.act('defend'), { fontSize: '15px' });
 
+        this.setButtons(false);
+
+        if (this.online) {
+            this.iniciarRemota();
+        } else {
+            this.battle = createBattle({ character, hp, mp }, era.enemy);
+            this.busy = false;
+            this.drawBars();
+            this.setButtons(true);
+        }
+    }
+
+    // Abre a batalha no Battle Service (POST /battles/start).
+    async iniciarRemota() {
+        this.log.setText('Iniciando batalha...');
+
+        try {
+            this.battle = await createRemoteBattle({ character: this.payload.character, era: this.era });
+        } catch (erro) {
+            if (!this.sys.isActive()) return;
+            this.mostrarErro(`${erro.message}\nToque para voltar.`, true);
+            return;
+        }
+
+        if (!this.sys.isActive()) return;
+
+        this.busy = false;
+        this.log.setText('Escolha sua ação.');
         this.drawBars();
         this.setButtons(true);
+    }
+
+    // Erro de comunicação. Se `sair` for true, o toque devolve o jogador à exploração.
+    mostrarErro(texto, sair) {
+        this.log.setColor('#ff8080').setText(texto);
+
+        if (sair) {
+            this.log.setInteractive({ useHandCursor: true });
+            this.log.once('pointerdown', () => {
+                this.battle = { over: true, won: false, xp: 0, aborted: true };
+                this.encerrar();
+            });
+        }
     }
 
     // ---------- interface ----------
@@ -121,14 +171,21 @@ export default class BattleScene extends Phaser.Scene {
 
         bar(this.ex, this.eTop - 30, st.eHp / b.enemy.maxHp, 0xd9534f);
         bar(this.px, this.pTop - 30, st.pHp / b.player.maxHp, 0x5cd97a);
-        bar(this.px, this.pTop - 18, st.pMp / b.player.maxMp, 0x4f8cff);
+
+        // O Battle Service não tem MP, então a barra azul só existe no modo teste.
+        if (!b.remote) bar(this.px, this.pTop - 18, st.pMp / b.player.maxMp, 0x4f8cff);
 
         this.enemyLabel.setText(`${b.enemy.name}\nHP ${st.eHp}/${b.enemy.maxHp}`);
-        this.playerLabel.setText(`${b.player.name}\nHP ${st.pHp}/${b.player.maxHp} • MP ${st.pMp}/${b.player.maxMp}`);
+        this.playerLabel.setText(
+            b.remote
+                ? `${b.player.name}\nHP ${st.pHp}/${b.player.maxHp}`
+                : `${b.player.name}\nHP ${st.pHp}/${b.player.maxHp} • MP ${st.pMp}/${b.player.maxMp}`
+        );
     }
 
     setButtons(enabled) {
-        const canSkill = enabled && this.battle.player.mp >= this.cls.skill.cost;
+        const semMp = !this.battle || this.battle.remote;
+        const canSkill = enabled && (semMp || this.battle.player.mp >= this.cls.skill.cost);
 
         this.btnAttack.setEnabled(enabled);
         this.btnDefend.setEnabled(enabled);
@@ -150,17 +207,35 @@ export default class BattleScene extends Phaser.Scene {
     // ---------- fluxo do turno ----------
 
     async act(action) {
-        if (this.busy || this.battle.over) return;
-
-        const result = playerAction(this.battle, action);
-
-        if (result.error) {
-            this.log.setText(result.error);
-            return;
-        }
+        if (this.busy || !this.battle || this.battle.over) return;
 
         this.busy = true;
         this.setButtons(false);
+
+        let result;
+
+        if (this.online) {
+            try {
+                result = await remoteAction(this.battle, action);
+            } catch (erro) {
+                if (!this.sys.isActive()) return;
+                this.log.setColor('#ff8080').setText(erro.message);
+                this.busy = false;
+                this.setButtons(true);
+                return;
+            }
+            if (!this.sys.isActive()) return;
+            this.log.setColor('#ffffff');
+        } else {
+            result = playerAction(this.battle, action);
+
+            if (result.error) {
+                this.log.setText(result.error);
+                this.busy = false;
+                this.setButtons(true);
+                return;
+            }
+        }
 
         for (const ev of result.events) {
             await this.playEvent(ev);
@@ -261,12 +336,21 @@ export default class BattleScene extends Phaser.Scene {
 
     encerrar() {
         const b = this.battle;
-        const resultado = {
-            won: b.won,
-            hp: b.player.hp,
-            mp: b.player.mp,
-            xp: b.xp
-        };
+        const { character, hp, mp } = this.payload;
+        let resultado;
+
+        if (b.aborted) {
+            // a batalha nem chegou a começar (serviço indisponível): nada muda
+            resultado = { aborted: true, won: false, hp, mp, xp: 0 };
+        } else if (b.remote) {
+            // O backend ainda não conhece a vida do personagem, então a vida final
+            // volta para o jogo como proporção da vida máxima.
+            const maxHp = character.sheet.maxHealthPoints;
+            const vida = Math.round((maxHp * b.player.hp) / b.player.maxHp);
+            resultado = { won: b.won, hp: b.won ? Math.max(1, vida) : 0, mp, xp: b.xp };
+        } else {
+            resultado = { won: b.won, hp: b.player.hp, mp: b.player.mp, xp: b.xp };
+        }
 
         const exploracao = this.scene.get('ExplorationScene');
 

@@ -1,14 +1,9 @@
 // ============================================================================
-// BATALHA LOCAL PROVISÓRIA
+// BATALHA LOCAL (SÓ PARA O MODO TESTE)
 //
-// O Battle Service ainda não tem endpoints. Este módulo só existe para o jogo
-// ser jogável enquanto isso. Pela arquitetura do projeto, dano e resultado
-// devem ser calculados no backend.
-//
-// Quando o Battle Service existir:
-//   1. adicione as chamadas reais em services/api.js;
-//   2. troque createBattle/playerAction por elas em scenes/BattleScene.js;
-//   3. apague este arquivo.
+// Com login, a batalha é processada pelo Battle Service (services/battleRemote.js).
+// Este módulo só é usado no MODO TESTE do menu (npm run dev), que roda sem backend.
+// Pela arquitetura do projeto, o cálculo real fica no backend.
 // ============================================================================
 
 import { classByName } from '../game/classes.js';

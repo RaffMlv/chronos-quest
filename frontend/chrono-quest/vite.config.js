@@ -17,6 +17,22 @@ export default defineConfig({
                 target: 'http://localhost:8082',
                 changeOrigin: true,
                 rewrite: (path) => path.replace(/^\/api\/character/, '')
+            },
+            '/api/battle': {
+                target: 'http://localhost:8083',
+                changeOrigin: true,
+                rewrite: (path) => path.replace(/^\/api\/battle/, '')
+            },
+            // loja e inventário (store-inventory-service)
+            '/api/shop': {
+                target: 'http://localhost:8085',
+                changeOrigin: true,
+                rewrite: (path) => path.replace(/^\/api\/shop/, '')
+            },
+            '/api/notification': {
+                target: 'http://localhost:8084',
+                changeOrigin: true,
+                rewrite: (path) => path.replace(/^\/api\/notification/, '')
             }
         }
     }

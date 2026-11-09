@@ -300,6 +300,68 @@ function drawDeco(ctx, era, variant) {
     }
 }
 
+// ---------- ícones de itens (loja / inventário / notificações) ----------
+
+const ICON_DRAW = {
+    icon_sword(c) {
+        for (let i = 0; i < 9; i++) {
+            px(c, '#dfe7f2', 12 - i, 2 + i, 2, 1);
+            px(c, '#9aa7b8', 13 - i, 3 + i, 1, 1);
+        }
+        px(c, '#d8b76a', 3, 9, 3, 1); // guarda
+        px(c, '#d8b76a', 5, 11, 1, 3);
+        px(c, '#8a5a2b', 3, 11, 2, 2); // empunhadura
+        px(c, '#8a5a2b', 2, 13, 2, 2);
+    },
+    icon_fire(c) {
+        px(c, '#e8532b', 6, 3, 4, 2);
+        px(c, '#e8532b', 5, 5, 6, 3);
+        px(c, '#e8532b', 4, 8, 8, 4);
+        px(c, '#f5a623', 5, 8, 6, 4);
+        px(c, '#f5a623', 6, 6, 4, 2);
+        px(c, '#ffe08a', 6, 9, 4, 3);
+        px(c, '#ffe08a', 7, 7, 2, 2);
+        px(c, '#e8532b', 5, 12, 6, 1);
+        px(c, '#e8532b', 7, 1, 2, 2);
+    },
+    icon_potion(c) {
+        px(c, '#9aa7b8', 6, 1, 4, 2); // rolha/gargalo
+        px(c, '#cfd8e6', 7, 3, 2, 2);
+        px(c, '#d9534f', 4, 6, 8, 7);
+        px(c, '#d9534f', 5, 5, 6, 9);
+        px(c, '#f08a86', 5, 7, 2, 4); // brilho
+        px(c, '#8f2d2a', 5, 13, 6, 1);
+    },
+    icon_potion2(c) {
+        px(c, '#9aa7b8', 6, 1, 4, 2);
+        px(c, '#cfd8e6', 7, 3, 2, 2);
+        px(c, '#7c4dff', 3, 6, 10, 7);
+        px(c, '#7c4dff', 4, 5, 8, 9);
+        px(c, '#b39bff', 4, 7, 2, 4);
+        px(c, '#d8b76a', 6, 8, 4, 1); // estrela dourada
+        px(c, '#d8b76a', 7, 7, 2, 3);
+        px(c, '#4a2fb3', 4, 13, 8, 1);
+    },
+    icon_coin(c) {
+        px(c, '#a8741a', 4, 2, 8, 12);
+        px(c, '#a8741a', 3, 4, 10, 8);
+        px(c, '#f2c94c', 4, 3, 8, 10);
+        px(c, '#f2c94c', 3, 5, 10, 6);
+        px(c, '#ffe08a', 5, 4, 2, 2);
+        px(c, '#a8741a', 7, 5, 2, 6); // marca da moeda
+        px(c, '#a8741a', 6, 7, 4, 2);
+    },
+    icon_bell(c) {
+        px(c, '#d8b76a', 7, 1, 2, 2);
+        px(c, '#d8b76a', 5, 3, 6, 2);
+        px(c, '#d8b76a', 4, 5, 8, 5);
+        px(c, '#f2d78f', 5, 5, 2, 4);
+        px(c, '#d8b76a', 3, 10, 10, 2);
+        px(c, '#a8841f', 3, 12, 10, 1);
+        px(c, '#8a5a2b', 7, 13, 2, 2); // badalo
+    }
+};
+
 // ---------- API pública ----------
 
 export function generateAssets(scene) {
@@ -320,6 +382,10 @@ export function generateAssets(scene) {
         [0, 1].forEach((v) => {
             addTexture(scene, `${era.id}_deco${v}`, TILE, TILE, (ctx) => drawDeco(ctx, era.id, v));
         });
+    });
+
+    Object.keys(ICON_DRAW).forEach((key) => {
+        addTexture(scene, key, TILE, TILE, (ctx) => ICON_DRAW[key](ctx));
     });
 
     addTexture(scene, 'shadow', 12, 5, (ctx) => {

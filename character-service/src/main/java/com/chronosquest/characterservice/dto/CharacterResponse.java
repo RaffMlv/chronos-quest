@@ -1,6 +1,7 @@
 package com.chronosquest.characterservice.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class CharacterResponse {
 
@@ -10,6 +11,7 @@ public class CharacterResponse {
     private String className;
     private LocalDateTime createdAt;
     private CharacterSheetResponse sheet;
+    private List<CharacterSkillResponse> skills;
 
     public CharacterResponse() {
     }
@@ -31,4 +33,12 @@ public class CharacterResponse {
 
     public CharacterSheetResponse getSheet() { return sheet; }
     public void setSheet(CharacterSheetResponse sheet) { this.sheet = sheet; }
+
+    public List<CharacterSkillResponse> getSkills() {
+        return skills;
+    }
+
+    public void setSkills(List<CharacterSkillResponse> skills) {
+        this.skills = skills;
+    }
 }

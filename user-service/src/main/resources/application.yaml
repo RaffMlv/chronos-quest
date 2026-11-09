@@ -23,8 +23,8 @@ eureka:
 
 chronos:
   jwt:
-    private-key-path: C:/Users/Acer/projetos/chronos-secrets/user-service/private.pem
-    public-key-path: C:/Users/Acer/projetos/chronos-secrets/user-service/public.pem
+    private-key-path: ${JWT_PRIVATE_KEY_PATH}
+    public-key-path: ${JWT_PUBLIC_KEY_PATH}
 
 logging:
   level:

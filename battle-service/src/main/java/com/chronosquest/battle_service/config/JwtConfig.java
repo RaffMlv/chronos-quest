@@ -16,12 +16,18 @@ import java.util.Base64;
 @Configuration
 public class JwtConfig {
 
-    @Value("${chronos.jwt.public-key-path:C:/Users/anaca/projetos/chronos-secrets/user-service/public.pem}")
+    // Sem valor padrão: cada pessoa aponta para a chave do seu computador
+    // pela variável de ambiente JWT_PUBLIC_KEY_LOCATION (ver application.yaml).
+    @Value("${chronos.jwt.public-key-path}")
     private String publicKeyPath;
 
     @Bean
     public RSAPublicKey rsaPublicKey() throws Exception {
-        String pem = Files.readString(Path.of(publicKeyPath));
+        // aceita "C:/pasta/public.pem" ou "file:C:/pasta/public.pem" (mesma variável dos outros serviços)
+        String location = publicKeyPath.startsWith("file:")
+                ? publicKeyPath.substring("file:".length()).replaceFirst("^/+(?=[A-Za-z]:)", "")
+                : publicKeyPath;
+        String pem = Files.readString(Path.of(location));
 
         String content = pem
                 .replace("-----BEGIN PUBLIC KEY-----", "")

@@ -15,6 +15,11 @@ public class BattleSession {
     private String enemyName;
     private String era;
 
+    private String playerClass;
+    private int strength;
+    private int dexterity;
+    private int intelligence;
+
     private int playerHp;
     private int playerMaxHp;
     private int enemyHp;
@@ -119,4 +124,16 @@ public class BattleSession {
     public void setLastDamageDealt(int lastDamageDealt) {
         this.lastDamageDealt = lastDamageDealt;
     }
+
+    public String getPlayerClass() { return playerClass; }
+    public void setPlayerClass(String playerClass) { this.playerClass = playerClass; }
+
+    public int getStrength() { return strength; }
+    public void setStrength(int strength) { this.strength = strength; }
+
+    public int getDexterity() { return dexterity; }
+    public void setDexterity(int dexterity) { this.dexterity = dexterity; }
+
+    public int getIntelligence() { return intelligence; }
+    public void setIntelligence(int intelligence) { this.intelligence = intelligence; }
 }

@@ -13,8 +13,14 @@ public class BattleResponse {
     private String currentTurn;
     private String status;
     private int lastDamageDealt;
+    private int xpReward;
 
     public BattleResponse(BattleSession session) {
+        this(session, 0);
+    }
+
+    public BattleResponse(BattleSession session, int xpReward) {
+        this.xpReward = xpReward;
         this.battleId = session.getId();
         this.characterId = session.getCharacterId();
         this.enemyName = session.getEnemyName();
@@ -65,5 +71,9 @@ public class BattleResponse {
 
     public int getLastDamageDealt() {
         return lastDamageDealt;
+    }
+
+    public int getXpReward() {
+        return xpReward;
     }
 }

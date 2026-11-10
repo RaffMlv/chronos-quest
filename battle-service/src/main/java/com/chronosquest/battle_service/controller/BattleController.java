@@ -24,18 +24,23 @@ public class BattleController {
             @AuthenticationPrincipal Jwt jwt,
             @RequestBody StartBattleRequest request) {
         Long userId = Long.valueOf(jwt.getSubject());
-        return ResponseEntity.ok(battleEngineService.startBattle(userId, request));
+        return ResponseEntity.ok(battleEngineService.startBattle(userId, jwt.getTokenValue(), request));
     }
 
     @PostMapping("/{id}/actions")
     public ResponseEntity<BattleResponse> processAction(
+            @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long id,
             @RequestBody BattleActionRequest request) {
-        return ResponseEntity.ok(battleEngineService.processTurn(id, request.getAction()));
+        Long userId = Long.valueOf(jwt.getSubject());
+        return ResponseEntity.ok(battleEngineService.processTurn(id, userId, request.getAction()));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BattleResponse> getBattleState(@PathVariable Long id) {
-        return ResponseEntity.ok(battleEngineService.getBattleState(id));
+    public ResponseEntity<BattleResponse> getBattleState(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable Long id) {
+        Long userId = Long.valueOf(jwt.getSubject());
+        return ResponseEntity.ok(battleEngineService.getBattleState(id, userId));
     }
 }

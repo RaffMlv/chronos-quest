@@ -5,11 +5,11 @@ import com.chronosquest.battle_service.model.BattleSession;
 public class EnemyTurnState implements BattleState {
     @Override
     public void handleTurn(BattleSession session) {
-        session.setCurrentActor("ENEMY");
+        session.setCurrentTurn("ENEMY");
     }
 
     @Override
-    public void nextState(BattleSession session) {
-        session.setState(new PlayerTurnState());
+    public BattleState next() {
+        return new PlayerTurnState();
     }
 }

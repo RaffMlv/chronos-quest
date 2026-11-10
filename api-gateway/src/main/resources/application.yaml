@@ -31,6 +31,27 @@ spring:
               filters:
                 - StripPrefix=1
 
+            - id: battle-service-route
+              uri: lb://battle-service
+              predicates:
+                - Path=/api/battles,/api/battles/**
+              filters:
+                - StripPrefix=1
+
+            - id: store-service-route
+              uri: lb://store-inventory-service
+              predicates:
+                - Path=/api/store,/api/store/**
+              filters:
+                - StripPrefix=1
+
+            - id: inventory-service-route
+              uri: lb://store-inventory-service
+              predicates:
+                - Path=/api/inventory,/api/inventory/**
+              filters:
+                - StripPrefix=1
+
             - id: notification-service-route
               uri: lb://notification-service
               predicates:

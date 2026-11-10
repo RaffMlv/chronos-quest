@@ -7,22 +7,13 @@ spring:
   application:
     name: battle-service
 
-  # Banco em memória: as batalhas somem ao reiniciar o serviço.
-  # Para usar o MySQL no lugar, troque url/driver/username/password por:
-  #   url: jdbc:mysql://localhost:3306/chronos_battle?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Fortaleza
-  #   driver-class-name: com.mysql.cj.jdbc.Driver
-  #   username: chronos_battle_app
-  #   password: ${CHRONOS_DB_PASSWORD}
-  # e apague o schema.sql (o Hibernate cria a tabela com ddl-auto: update).
+  # MySQL: banco chronos_battle (criado em infra/mysql/01 e 02).
+  # Tabela: infra/mysql/chronos-battle/07-battle-tables.sql (o Hibernate também ajusta com ddl-auto: update).
   datasource:
-    url: jdbc:h2:mem:battledb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-
-  sql:
-    init:
-      mode: always
+    url: jdbc:mysql://localhost:3306/chronos_battle?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Fortaleza
+    username: chronos_battle_app
+    password: ${CHRONOS_DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     show-sql: true

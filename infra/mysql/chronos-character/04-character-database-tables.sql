@@ -1,15 +1,16 @@
-use chronos_character;
-CREATE DATABASE chronos_character
+CREATE DATABASE IF NOT EXISTS chronos_character
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_0900_ai_ci;
 
-CREATE USER 'chronos_character_app'@'localhost'
+CREATE USER IF NOT EXISTS 'chronos_character_app'@'localhost'
 IDENTIFIED BY 'SUA_SENHA_AQUI';
 
 GRANT SELECT, INSERT, UPDATE, DELETE,
 CREATE, ALTER, INDEX, REFERENCES
 ON chronos_character.*
 TO 'chronos_character_app'@'localhost';
+
+USE chronos_character;
 
 CREATE TABLE character_classes (
                                    id BIGINT AUTO_INCREMENT PRIMARY KEY,

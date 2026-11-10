@@ -1,6 +1,10 @@
+# battle-service — correções
+
+Substitua a pasta `battle-service` do repositório por esta (só mexe no battle-service).
+
 ## O que foi corrigido
-- pom.xml: conflito de merge resolvido; adicionado driver H2 (o yaml usa H2 em memória).
-- application.yaml: porta 8083, nome `battle-service`, Eureka, caminho da chave JWT por variável de ambiente.
+- pom.xml: conflito de merge resolvido.
+- application.yaml: porta 8085, nome `battle-service`, Eureka, MySQL (`chronos_battle`, usuário `chronos_battle_app`), caminho da chave JWT pela variável JWT_PUBLIC_KEY_LOCATION (a mesma dos outros serviços).
 - JwtConfig: removido o caminho fixo do PC da Ana (`C:/Users/anaca/...`).
 - Padrão State: não compilava (`setCurrentActor`/`setState` não existiam). Agora `handleTurn` + `next()`.
 - Batalha usa o personagem REAL: lê `GET /characters/{id}` no character-service (repassa o JWT), usa HP e atributos da ficha.
@@ -10,7 +14,8 @@
 - Testes duplicados que quebravam removidos; adicionado CombatRulesTest.
 
 ## Variáveis de ambiente
-- `CHRONOS_JWT_PUBLIC_KEY` = caminho do public.pem do user-service (obrigatória)
+- `JWT_PUBLIC_KEY_LOCATION` = `file:C:/caminho/public.pem` (obrigatória; aceita com ou sem `file:`)
+- `CHRONOS_DB_PASSWORD` = senha do usuário `chronos_battle_app` (obrigatória)
 - `CHRONOS_CHARACTER_URL` = padrão http://localhost:8082
 
 ## Ainda NÃO feito (depende do time)

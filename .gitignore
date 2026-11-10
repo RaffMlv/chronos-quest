@@ -16,3 +16,5 @@ infra/mysql/*-local.sql
 # Frontend
 frontend/node_modules/
 frontend/dist/
+# Variáveis de ambiente locais (copie o .example.ps1)
+infra/env/variaveis-ambiente.ps1

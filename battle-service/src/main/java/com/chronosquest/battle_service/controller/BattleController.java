@@ -1,3 +1,4 @@
+
 package com.chronosquest.battle_service.controller;
 
 import com.chronosquest.battle_service.dto.BattleActionRequest;
@@ -23,8 +24,16 @@ public class BattleController {
     public ResponseEntity<BattleResponse> startBattle(
             @AuthenticationPrincipal Jwt jwt,
             @RequestBody StartBattleRequest request) {
+
         Long userId = Long.valueOf(jwt.getSubject());
-        return ResponseEntity.ok(battleEngineService.startBattle(userId, jwt.getTokenValue(), request));
+
+        return ResponseEntity.ok(
+                battleEngineService.startBattle(
+                        userId,
+                        jwt.getTokenValue(),
+                        request
+                )
+        );
     }
 
     @PostMapping("/{id}/actions")
@@ -32,15 +41,28 @@ public class BattleController {
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long id,
             @RequestBody BattleActionRequest request) {
+
         Long userId = Long.valueOf(jwt.getSubject());
-        return ResponseEntity.ok(battleEngineService.processTurn(id, userId, request.getAction()));
+
+        return ResponseEntity.ok(
+                battleEngineService.processTurn(
+                        id,
+                        userId,
+                        jwt.getTokenValue(),
+                        request.getAction()
+                )
+        );
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<BattleResponse> getBattleState(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long id) {
+
         Long userId = Long.valueOf(jwt.getSubject());
-        return ResponseEntity.ok(battleEngineService.getBattleState(id, userId));
+
+        return ResponseEntity.ok(
+                battleEngineService.getBattleState(id, userId)
+        );
     }
 }

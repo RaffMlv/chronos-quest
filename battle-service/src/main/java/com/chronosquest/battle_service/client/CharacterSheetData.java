@@ -1,3 +1,4 @@
+
 package com.chronosquest.battle_service.client;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -9,4 +10,7 @@ public record CharacterSheetData(
         int dexterity,
         int intelligence,
         int healthPoints,
-        int maxHealthPoints) {}
+        int maxHealthPoints,
+        int manaPoints,
+        int maxManaPoints
+) {}

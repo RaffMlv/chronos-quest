@@ -22,6 +22,8 @@ public class BattleSession {
 
     private int playerHp;
     private int playerMaxHp;
+    private int playerMp;
+    private int playerMaxMp;
     private int enemyHp;
     private int enemyMaxHp;
 
@@ -83,6 +85,22 @@ public class BattleSession {
 
     public void setPlayerMaxHp(int playerMaxHp) {
         this.playerMaxHp = playerMaxHp;
+    }
+
+    public int getPlayerMp() {
+        return playerMp;
+    }
+
+    public void setPlayerMp(int playerMp) {
+        this.playerMp = playerMp;
+    }
+
+    public int getPlayerMaxMp() {
+        return playerMaxMp;
+    }
+
+    public void setPlayerMaxMp(int playerMaxMp) {
+        this.playerMaxMp = playerMaxMp;
     }
 
     public int getEnemyHp() {

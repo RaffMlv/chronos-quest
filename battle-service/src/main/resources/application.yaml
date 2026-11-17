@@ -1,3 +1,4 @@
+
 server:
   error:
     include-message: always
@@ -7,8 +8,7 @@ spring:
   application:
     name: battle-service
 
-  # MySQL: banco chronos_battle (criado em infra/mysql/01 e 02).
-  # Tabela: infra/mysql/chronos-battle/07-battle-tables.sql (o Hibernate também ajusta com ddl-auto: update).
+  # MySQL: banco chronos_battle
   datasource:
     url: jdbc:mysql://localhost:3306/chronos_battle?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Fortaleza
     username: chronos_battle_app
@@ -35,9 +35,13 @@ management:
 
 chronos:
   jwt:
-    # Caminho da chave PÚBLICA do user-service no seu computador.
-    # Mesma variável de ambiente dos outros serviços: JWT_PUBLIC_KEY_LOCATION.
+    # Caminho da chave pública do user-service
     public-key-path: ${JWT_PUBLIC_KEY_LOCATION}
+
   character-service:
-    # O battle lê os atributos do personagem em GET /characters/{id}.
+    # URL do Character Service
     url: ${CHRONOS_CHARACTER_URL:http://localhost:8082}
+
+  notification-service:
+    # URL do Notification Service
+    url: ${CHRONOS_NOTIFICATION_URL:http://localhost:8084}

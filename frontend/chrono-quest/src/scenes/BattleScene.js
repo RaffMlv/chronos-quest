@@ -172,14 +172,16 @@ export default class BattleScene extends Phaser.Scene {
         bar(this.ex, this.eTop - 30, st.eHp / b.enemy.maxHp, 0xd9534f);
         bar(this.px, this.pTop - 30, st.pHp / b.player.maxHp, 0x5cd97a);
 
-        // O Battle Service não tem MP, então a barra azul só existe no modo teste.
-        if (!b.remote) bar(this.px, this.pTop - 18, st.pMp / b.player.maxMp, 0x4f8cff);
+        bar(
+            this.px,
+            this.pTop - 18,
+            b.player.maxMp > 0 ? st.pMp / b.player.maxMp : 0,
+            0x4f8cff
+        );
 
         this.enemyLabel.setText(`${b.enemy.name}\nHP ${st.eHp}/${b.enemy.maxHp}`);
         this.playerLabel.setText(
-            b.remote
-                ? `${b.player.name}\nHP ${st.pHp}/${b.player.maxHp}`
-                : `${b.player.name}\nHP ${st.pHp}/${b.player.maxHp} • MP ${st.pMp}/${b.player.maxMp}`
+            `${b.player.name}\nHP ${st.pHp}/${b.player.maxHp} • MP ${st.pMp}/${b.player.maxMp}`
         );
     }
 
@@ -318,11 +320,20 @@ export default class BattleScene extends Phaser.Scene {
             fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(101);
 
+        const mensagem = b.won
+            ? `Você recebeu +${b.xp} XP!\nExperiência salva no personagem.`
+            : 'Você voltará ao início do mapa.';
+
         this.add.text(
             w / 2,
             h * 0.36 + 2,
-            b.won ? `+${b.xp} XP (somente nesta sessão)` : 'Você voltará ao início do mapa.',
-            { fontSize: '14px', color: '#ffffff', align: 'center', wordWrap: { width: 280 } }
+            mensagem,
+            {
+                fontSize: '14px',
+                color: '#ffffff',
+                align: 'center',
+                wordWrap: { width: 280 }
+            }
         ).setOrigin(0.5).setDepth(101);
 
         const botao = addButton(this, w / 2, h * 0.36 + 50, 160, 40, 'CONTINUAR', () => this.encerrar(), {
@@ -330,6 +341,7 @@ export default class BattleScene extends Phaser.Scene {
             color: '#080d1a',
             fontSize: '15px'
         });
+
         botao.bg.setDepth(101);
         botao.txt.setDepth(102);
     }

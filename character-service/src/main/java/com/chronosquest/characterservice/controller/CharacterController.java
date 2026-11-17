@@ -1,5 +1,6 @@
 package com.chronosquest.characterservice.controller;
 
+import com.chronosquest.characterservice.dto.AddExperienceRequest;
 import com.chronosquest.characterservice.dto.CharacterResponse;
 import com.chronosquest.characterservice.dto.CreateCharacterRequest;
 import com.chronosquest.characterservice.service.CharacterService;
@@ -69,4 +70,23 @@ public class CharacterController {
 
         return ResponseEntity.ok(response);
     }
+
+
+    @PatchMapping("/{id}/experience")
+    public ResponseEntity<CharacterResponse> addExperience(
+            @PathVariable Long id,
+            @Valid @RequestBody AddExperienceRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        Long userId = Long.valueOf(jwt.getSubject());
+
+        CharacterResponse response = characterService.addExperience(
+                id,
+                userId,
+                request.amount()
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
 }

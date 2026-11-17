@@ -198,4 +198,29 @@ public class CharacterService {
 
         return response;
     }
+
+
+    @Transactional
+    public CharacterResponse addExperience(Long characterId, Long userId, Long amount) {
+
+        CharacterEntity character = characterRepository
+                .findByIdAndUserId(characterId, userId)
+                .orElseThrow(() -> new RuntimeException("Personagem não encontrado."));
+
+        CharacterSheet sheet = character.getSheet();
+
+        if (sheet == null) {
+            throw new RuntimeException("Ficha do personagem não encontrada.");
+        }
+
+        long totalExperience = sheet.getExperience() + amount;
+
+        int newLevel = (int) (totalExperience / 60) + 1;
+
+        sheet.setExperience(totalExperience);
+        sheet.setLevel(newLevel);
+
+        return convertToResponse(character);
+    }
+
 }

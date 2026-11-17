@@ -83,7 +83,7 @@ function extractMessage(data, status) {
     return 'Não foi possível concluir a operação.';
 }
 
-async function request(service, path, { method = 'GET', body, auth = true } = {}) {
+async function request(path, { method = 'GET', body, auth = true } = {}) {
     const headers = { 'Content-Type': 'application/json' };
 
     if (auth) {
@@ -93,7 +93,7 @@ async function request(service, path, { method = 'GET', body, auth = true } = {}
 
     let response;
     try {
-        response = await fetch(`${BASE}/${service}${path}`, {
+        response = await fetch(`${BASE}${path}`, {
             method,
             headers,
             body: body ? JSON.stringify(body) : undefined
@@ -104,6 +104,7 @@ async function request(service, path, { method = 'GET', body, auth = true } = {}
 
     const text = await response.text();
     let data = null;
+
     if (text) {
         try {
             data = JSON.parse(text);
@@ -118,11 +119,10 @@ async function request(service, path, { method = 'GET', body, auth = true } = {}
 
     return data;
 }
-
 // ---- user-service ----
 
 export function registerUser({ username, email, password, displayName }) {
-    return request('user', '/users', {
+    return request('/users', {
         method: 'POST',
         auth: false,
         body: { username, email, password, displayName }
@@ -131,11 +131,12 @@ export function registerUser({ username, email, password, displayName }) {
 
 // identifier = username ou e-mail (campo do LoginRequest)
 export async function login(identifier, password) {
-    const data = await request('user', '/auth/login', {
+    const data = await request('/auth/login', {
         method: 'POST',
         auth: false,
         body: { identifier, password }
     });
+
     saveToken(data.accessToken);
     return data;
 }
@@ -144,12 +145,12 @@ export async function login(identifier, password) {
 
 export function listCharacters() {
     if (offline) return Promise.resolve([...offlineCharacters]);
-    return request('character', '/characters');
+    return request('/characters');
 }
 
 export function getCharacter(id) {
     if (offline) return Promise.resolve(offlineCharacters.find((c) => c.id === id));
-    return request('character', `/characters/${id}`);
+    return request(`/characters/${id}`);
 }
 
 export function createCharacter({ name, classId }) {
@@ -161,7 +162,6 @@ export function createCharacter({ name, classId }) {
             classId: cls.id,
             className: cls.name,
             createdAt: new Date().toISOString(),
-            // valores padrão do script SQL (character_sheets)
             sheet: {
                 level: 1, experience: 0,
                 strength: 10, dexterity: 10, constitution: 10,
@@ -174,12 +174,11 @@ export function createCharacter({ name, classId }) {
         return Promise.resolve(personagem);
     }
 
-    return request('character', '/characters', {
+    return request('/characters', {
         method: 'POST',
         body: { name, classId }
     });
 }
-
 // ---- battle-service ----
 
 // Resposta das três rotas (BattleResponse):
@@ -187,22 +186,21 @@ export function createCharacter({ name, classId }) {
 //   enemyMaxHp, currentTurn, status (IN_PROGRESS | VICTORY | DEFEAT), lastDamageDealt
 
 export function startBattle({ characterId, enemyName, era }) {
-    return request('battle', '/battles/start', {
+    return request('/battles/start', {
         method: 'POST',
         body: { characterId, enemyName, era }
     });
 }
 
-// action: 'ATTACK' | 'SKILL' | 'DEFEND'
 export function sendBattleAction(battleId, action) {
-    return request('battle', `/battles/${battleId}/actions`, {
+    return request(`/battles/${battleId}/actions`, {
         method: 'POST',
         body: { action }
     });
 }
 
 export function getBattle(battleId) {
-    return request('battle', `/battles/${battleId}`);
+    return request(`/battles/${battleId}`);
 }
 
 // ---- store-inventory-service (proxy /api/shop) ----
@@ -236,12 +234,12 @@ function offlineEntries(characterId) {
 
 export function listStoreItems() {
     if (offline) return Promise.resolve(OFFLINE_ITEMS.map((i) => ({ ...i })));
-    return request('shop', '/store/items');
+    return request('/store/items');
 }
 
 export function getWallet() {
     if (offline) return Promise.resolve({ coins: offlineCoins });
-    return request('shop', '/store/wallet');
+    return request('/store/wallet');
 }
 
 export function purchaseItem({ characterId, itemId, quantity = 1 }) {
@@ -256,7 +254,7 @@ export function purchaseItem({ characterId, itemId, quantity = 1 }) {
         offlineInventory.set(key, (offlineInventory.get(key) || 0) + quantity);
         return Promise.resolve({ itemName: item.name, quantity, totalSpent: total, coinsLeft: offlineCoins });
     }
-    return request('shop', '/store/purchase', {
+    return request('/store/purchase', {
         method: 'POST',
         body: { characterId, itemId, quantity }
     });
@@ -264,7 +262,7 @@ export function purchaseItem({ characterId, itemId, quantity = 1 }) {
 
 export function listInventory(characterId) {
     if (offline) return Promise.resolve(offlineEntries(characterId));
-    return request('shop', `/inventory/${characterId}`);
+    return request(`/inventory/${characterId}`);
 }
 
 // Poder de ataque somando as armas do inventário (padrão Decorator no backend)
@@ -276,7 +274,7 @@ export function getAttackPower(characterId) {
             equipment: armas.map((e) => `${e.name} (+${e.attackBonus})`)
         });
     }
-    return request('shop', `/inventory/${characterId}/power`);
+    return request(`/inventory/${characterId}/power`);
 }
 
 export function useInventoryItem(characterId, itemId) {
@@ -295,7 +293,9 @@ export function useInventoryItem(characterId, itemId) {
             remaining: Math.max(0, remaining)
         });
     }
-    return request('shop', `/inventory/${characterId}/items/${itemId}/use`, { method: 'POST' });
+    return request(`/inventory/${characterId}/items/${itemId}/use`, {
+        method: 'POST'
+    });
 }
 
 export function removeInventoryItem(characterId, itemId) {
@@ -303,7 +303,9 @@ export function removeInventoryItem(characterId, itemId) {
         offlineInventory.delete(`${characterId}:${itemId}`);
         return Promise.resolve(null);
     }
-    return request('shop', `/inventory/${characterId}/items/${itemId}`, { method: 'DELETE' });
+    return request(`/inventory/${characterId}/items/${itemId}`, {
+        method: 'DELETE'
+    });
 }
 
 // ---- notification-service (proxy /api/notification) ----
@@ -319,8 +321,16 @@ const offlineNotifications = [
 
 export function listNotifications() {
     if (offline) return Promise.resolve(offlineNotifications.map((n) => ({ ...n })));
-    return request('notification', '/notifications');
+    return request('/notifications');
 }
+
+export function createNotification(payload) {
+    return request('/notifications', {
+        method: 'POST',
+        body: payload
+    });
+}
+
 
 export function markNotificationRead(id) {
     if (offline) {
@@ -328,7 +338,7 @@ export function markNotificationRead(id) {
         if (n) n.status = 'READ';
         return Promise.resolve(n ? { ...n } : null);
     }
-    return request('notification', `/notifications/${id}/read`, { method: 'PATCH' });
+    return request(`/notifications/${id}/read`, { method: 'PATCH' });
 }
 
 export function markAllNotificationsRead() {
@@ -336,7 +346,7 @@ export function markAllNotificationsRead() {
         offlineNotifications.forEach((n) => { n.status = 'READ'; });
         return Promise.resolve(null);
     }
-    return request('notification', '/notifications/read-all', { method: 'PATCH' });
+    return request('/notifications/read-all', { method: 'PATCH' });
 }
 
 export function deleteNotification(id) {
@@ -345,5 +355,5 @@ export function deleteNotification(id) {
         if (i >= 0) offlineNotifications.splice(i, 1);
         return Promise.resolve(null);
     }
-    return request('notification', `/notifications/${id}`, { method: 'DELETE' });
+    return request(`/notifications/${id}`, { method: 'DELETE' });
 }

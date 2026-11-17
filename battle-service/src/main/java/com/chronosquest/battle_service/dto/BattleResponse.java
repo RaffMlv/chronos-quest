@@ -1,17 +1,25 @@
+
 package com.chronosquest.battle_service.dto;
 
 import com.chronosquest.battle_service.model.BattleSession;
 
 public class BattleResponse {
+
     private Long battleId;
     private Long characterId;
     private String enemyName;
+
     private int playerHp;
     private int playerMaxHp;
+    private int playerMp;
+    private int playerMaxMp;
+
     private int enemyHp;
     private int enemyMaxHp;
+
     private String currentTurn;
     private String status;
+
     private int lastDamageDealt;
     private int xpReward;
 
@@ -20,17 +28,23 @@ public class BattleResponse {
     }
 
     public BattleResponse(BattleSession session, int xpReward) {
-        this.xpReward = xpReward;
         this.battleId = session.getId();
         this.characterId = session.getCharacterId();
         this.enemyName = session.getEnemyName();
+
         this.playerHp = session.getPlayerHp();
         this.playerMaxHp = session.getPlayerMaxHp();
+        this.playerMp = session.getPlayerMp();
+        this.playerMaxMp = session.getPlayerMaxMp();
+
         this.enemyHp = session.getEnemyHp();
         this.enemyMaxHp = session.getEnemyMaxHp();
+
         this.currentTurn = session.getCurrentTurn();
         this.status = session.getStatus();
+
         this.lastDamageDealt = session.getLastDamageDealt();
+        this.xpReward = xpReward;
     }
 
     public Long getBattleId() {
@@ -51,6 +65,14 @@ public class BattleResponse {
 
     public int getPlayerMaxHp() {
         return playerMaxHp;
+    }
+
+    public int getPlayerMp() {
+        return playerMp;
+    }
+
+    public int getPlayerMaxMp() {
+        return playerMaxMp;
     }
 
     public int getEnemyHp() {

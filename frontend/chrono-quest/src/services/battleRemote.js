@@ -1,19 +1,12 @@
-// Batalha processada pelo Battle Service.
-//
-// O backend decide dano, vida, turno e resultado. Este arquivo só traduz a
-// resposta (BattleResponse) para os eventos que a BattleScene sabe animar,
-// com o mesmo formato usado por battleLocal.js.
-//
-// Limites do backend atual, que o front não esconde nem inventa:
-//   - a vida inicial é fixa (jogador 100, inimigo 80) e não vem do character-service;
-//   - não existe MP, XP nem recompensa na resposta;
-//   - a resposta traz só o dano do jogador (lastDamageDealt). O dano do inimigo
-//     é calculado aqui pela diferença da vida do jogador antes e depois.
 
 import { startBattle, sendBattleAction } from './api.js';
 import { classByName } from '../game/classes.js';
 
-const ACTIONS = { attack: 'ATTACK', skill: 'SKILL', defend: 'DEFEND' };
+const ACTIONS = {
+    attack: 'ATTACK',
+    skill: 'SKILL',
+    defend: 'DEFEND'
+};
 
 export async function createRemoteBattle({ character, era }) {
     const data = await startBattle({
@@ -29,13 +22,15 @@ export async function createRemoteBattle({ character, era }) {
         over: data.status !== 'IN_PROGRESS',
         won: data.status === 'VICTORY',
         xp: 0,
+
         player: {
             name: character.name,
             hp: data.playerHp,
             maxHp: data.playerMaxHp,
-            mp: 0,
-            maxMp: 0
+            mp: data.playerMp,
+            maxMp: data.playerMaxMp
         },
+
         enemy: {
             name: data.enemyName || era.enemy.name,
             hp: data.enemyHp,
@@ -45,28 +40,39 @@ export async function createRemoteBattle({ character, era }) {
     };
 }
 
-function snap(pHp, eHp) {
-    return { pHp, pMp: 0, eHp };
+function snap(pHp, pMp, eHp) {
+    return { pHp, pMp, eHp };
 }
 
-// action: 'attack' | 'skill' | 'defend'
-// Retorna { events } no mesmo formato de battleLocal.playerAction.
 export async function remoteAction(b, action) {
-    if (b.over) return { events: [] };
+    if (b.over) {
+        return { events: [] };
+    }
 
-    const data = await sendBattleAction(b.id, ACTIONS[action] || 'ATTACK');
+    const data = await sendBattleAction(
+        b.id,
+        ACTIONS[action] || 'ATTACK'
+    );
 
     const events = [];
+
     const prevPlayerHp = b.player.hp;
+    const prevPlayerMp = b.player.mp;
+
     const dmg = data.lastDamageDealt;
     const skill = b.cls.skill;
 
-    // 1) ação do jogador: o inimigo já aparece com a vida nova, o jogador ainda com a antiga
+    // Ação do jogador.
     if (action === 'defend') {
         events.push({
-            actor: 'player', type: 'defend',
+            actor: 'player',
+            type: 'defend',
             log: `${b.player.name} se prepara para o impacto.`,
-            after: snap(prevPlayerHp, data.enemyHp)
+            after: snap(
+                prevPlayerHp,
+                data.playerMp,
+                data.enemyHp
+            )
         });
     } else {
         events.push({
@@ -77,42 +83,67 @@ export async function remoteAction(b, action) {
             log: action === 'skill'
                 ? `${b.player.name} usa ${skill.name}: ${dmg} de dano!`
                 : `${b.player.name} ataca: ${dmg} de dano.`,
-            after: snap(prevPlayerHp, data.enemyHp)
+            after: snap(
+                prevPlayerHp,
+                data.playerMp,
+                data.enemyHp
+            )
         });
     }
 
     b.enemy.hp = data.enemyHp;
 
     if (data.status === 'VICTORY') {
-        // o backend encerra a batalha sem contra-ataque
         events.push({
-            actor: 'enemy', type: 'dead',
+            actor: 'enemy',
+            type: 'dead',
             log: `${b.enemy.name} foi derrotado!`,
-            after: snap(prevPlayerHp, data.enemyHp)
+            after: snap(
+                prevPlayerHp,
+                data.playerMp,
+                data.enemyHp
+            )
         });
 
+        b.player.mp = data.playerMp;
         b.over = true;
         b.won = true;
-        b.xp = data.xpReward ?? b.enemy.xp; // XP vem do Battle Service (só exibição: ninguém grava XP no personagem ainda)
+        b.xp = data.xpReward ?? b.enemy.xp;
+
         return { events };
     }
 
-    // 2) contra-ataque do inimigo (diferença da vida do jogador)
-    const enemyDmg = Math.max(0, prevPlayerHp - data.playerHp);
+    // Contra-ataque do inimigo.
+    const enemyDmg = Math.max(
+        0,
+        prevPlayerHp - data.playerHp
+    );
+
     b.player.hp = data.playerHp;
+    b.player.mp = data.playerMp;
 
     events.push({
-        actor: 'enemy', type: 'attack',
+        actor: 'enemy',
+        type: 'attack',
         dmg: enemyDmg,
         log: `${b.enemy.name} ataca: ${enemyDmg} de dano.`,
-        after: snap(data.playerHp, data.enemyHp)
+        after: snap(
+            data.playerHp,
+            data.playerMp,
+            data.enemyHp
+        )
     });
 
     if (data.status === 'DEFEAT') {
         events.push({
-            actor: 'player', type: 'dead',
+            actor: 'player',
+            type: 'dead',
             log: `${b.player.name} caiu...`,
-            after: snap(data.playerHp, data.enemyHp)
+            after: snap(
+                data.playerHp,
+                data.playerMp,
+                data.enemyHp
+            )
         });
 
         b.over = true;
